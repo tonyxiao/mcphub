@@ -2399,6 +2399,7 @@ export const getServersInfo = async (
           prompts: promptsWithEnabled,
           resources: resourcesWithEnabled,
           createTime,
+          ...(serverConfig?.createdAt ? { createdAt: serverConfig.createdAt } : {}),
           enabled,
           // Resolved npx/uvx package version + registry update hint (#1166).
           // Runtime state, kept at the top level like `version` so it can never
@@ -2435,8 +2436,10 @@ export const getServersInfo = async (
         };
       },
     );
-  // Sorting is now handled at DAO layer for consistent pagination results
-  return infos;
+  // Runtime reconnections can reorder serverInfos. Return the persisted DAO
+  // order so legacy entries without creation timestamps remain stable.
+  const order = new Map(allServers.map((server, index) => [server.name, index]));
+  return infos.sort((a, b) => order.get(a.name)! - order.get(b.name)!);
 };
 
 // Get server by name

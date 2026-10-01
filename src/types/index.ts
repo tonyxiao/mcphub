@@ -414,6 +414,7 @@ export interface StoredCredentialBinding {
 
 // Configuration details for an individual server
 export interface ServerConfig {
+  createdAt?: string; // Persisted creation time; absent for legacy JSON entries.
   credentialTemplate?: CredentialSlot[]; // Metadata only; every slot requires a personal binding.
   type?: 'stdio' | 'sse' | 'streamable-http' | 'openapi'; // Type of server
   description?: string; // Optional server note/description for management UI
@@ -561,6 +562,7 @@ export interface OpenAPISecurityConfig {
 
 // Information about a server's status and tools
 export interface ServerInfo {
+  createdAt?: string; // Persisted creation time, independent of runtime connection time.
   name: string; // Unique name of the server
   version?: string; // Upstream server version reported during MCP initialization
   // Resolved package version for stdio servers launched via npx/uvx (see #1166).

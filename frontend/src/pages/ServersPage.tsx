@@ -11,7 +11,7 @@ import JSONImportForm from '@/components/JSONImportForm';
 import Pagination from '@/components/ui/Pagination';
 import { useServerData } from '@/hooks/useServerData';
 import { useCostData } from '@/hooks/useCostData';
-import { selectServerPage, getServerFilterCounts, type ServerFilter } from '@/utils/serverFilters';
+import { selectServerPage, getServerFilterCounts, SERVER_SORTS, type ServerSort, type ServerFilter } from '@/utils/serverFilters';
 import { resolveDuplicateResponse } from '@/utils/serverDuplicate';
 
 const ServersPage: React.FC = () => {
@@ -53,14 +53,24 @@ const ServersPage: React.FC = () => {
   const [showJsonImport, setShowJsonImport] = useState(false);
   const [filter, setFilter] = useState<ServerFilter>('all');
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<ServerSort>(() => {
+    const saved = window.localStorage.getItem('mcphub_server_sort');
+    return SERVER_SORTS.includes(saved as ServerSort) ? (saved as ServerSort) : 'oldest';
+  });
+
+  const handleSortChange = (value: ServerSort) => {
+    window.localStorage.setItem('mcphub_server_sort', value);
+    setSort(value);
+    setCurrentPage(1);
+  };
 
   const counts = useMemo(() => getServerFilterCounts(allServers), [allServers]);
 
   // Filter against the full list and paginate the filtered result client-side,
   // so status filters reach servers that live on other pagination pages.
   const { servers: visibleServers, pagination: clientPagination } = useMemo(
-    () => selectServerPage(allServers, filter, search, currentPage, serversPerPage),
-    [allServers, filter, search, currentPage, serversPerPage],
+    () => selectServerPage(allServers, filter, search, currentPage, serversPerPage, sort),
+    [allServers, filter, search, currentPage, serversPerPage, sort],
   );
 
   // Sync currentPage when client-side pagination clamps it (filter/search narrows results).
@@ -269,6 +279,21 @@ const ServersPage: React.FC = () => {
           )}
         </div>
 
+        <div className="flex items-center gap-2 text-[12px]">
+          <label htmlFor="serverSort">{t('server.sortLabel')}</label>
+          <select
+            id="serverSort"
+            value={sort}
+            onChange={(e) => handleSortChange(e.target.value as ServerSort)}
+            className="hub-input"
+            style={{ height: 30, width: 170, padding: '0 6px', fontSize: 12 }}
+          >
+            {SERVER_SORTS.map((value) => (
+              <option key={value} value={value}>{t(`server.sortOptions.${value}`)}</option>
+            ))}
+          </select>
+        </div>
+
         <div className="ml-auto hub-mono text-[12px]" style={{ color: 'var(--hub-ink-3)' }}>
           {clientPagination.total}/{allServers.length}
         </div>
@@ -336,10 +361,10 @@ const ServersPage: React.FC = () => {
                 className="hub-input"
                 style={{ height: 26, width: 70, padding: '0 6px', fontSize: 12 }}
               >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
+                <option value={25}>25</option>
                 <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={200}>200</option>
               </select>
             </div>
           </div>

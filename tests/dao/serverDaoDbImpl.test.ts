@@ -20,6 +20,14 @@ jest.mock('../../src/db/repositories/ServerRepository.js', () => ({
 import { ServerDaoDbImpl } from '../../src/dao/ServerDaoDbImpl.js';
 
 describe('ServerDaoDbImpl', () => {
+  it('exposes the persisted database creation timestamp', async () => {
+    const dao = new ServerDaoDbImpl();
+    mockRepository.findByName.mockResolvedValue({
+      name: 'fixture', enabled: true, createdAt: new Date('2026-01-01T00:00:00Z'),
+    });
+    expect((await dao.findById('fixture'))?.createdAt).toBe('2026-01-01T00:00:00.000Z');
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });

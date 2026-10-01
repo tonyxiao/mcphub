@@ -1,4 +1,8 @@
-import { filterServers, getServerFilterCounts, selectServerPage } from '../../frontend/src/utils/serverFilters';
+import {
+  filterServers,
+  getServerFilterCounts,
+  selectServerPage,
+} from '../../frontend/src/utils/serverFilters';
 import type { Server, Tool } from '../../frontend/src/types';
 
 const makeTool = (name: string): Tool => ({
@@ -64,8 +68,18 @@ describe('serverFilters', () => {
 
 describe('selectServerPage', () => {
   // Build a list where disabled servers do NOT land on page 1 (limit 5).
-  const online = (name: string): Server => ({ name, status: 'connected', enabled: true, tools: [] });
-  const disabled = (name: string): Server => ({ name, status: 'disconnected', enabled: false, tools: [] });
+  const online = (name: string): Server => ({
+    name,
+    status: 'connected',
+    enabled: true,
+    tools: [],
+  });
+  const disabled = (name: string): Server => ({
+    name,
+    status: 'disconnected',
+    enabled: false,
+    tools: [],
+  });
 
   const allServers: Server[] = [
     online('online-1'),
@@ -124,5 +138,43 @@ describe('selectServerPage', () => {
     expect(servers).toEqual([]);
     expect(pagination.total).toBe(0);
     expect(pagination.totalPages).toBe(1);
+  });
+});
+
+describe('server sorting across pages', () => {
+  const servers: Server[] = [
+    {
+      name: 'disabled-a',
+      status: 'disconnected',
+      enabled: false,
+      createdAt: '2020-01-01T00:00:00Z',
+    },
+    { name: 'z-new', status: 'connected', createdAt: '2026-09-30T00:00:00Z' },
+    { name: 'legacy-b', status: 'disconnected' },
+    { name: 'a-old', status: 'connected', createdAt: '2026-01-01T00:00:00Z' },
+    { name: 'legacy-a', status: 'connected' },
+  ];
+
+  it('sorts the complete result before slicing pages and keeps disabled servers last', () => {
+    const first = selectServerPage(servers, 'all', '', 1, 3);
+    const second = selectServerPage(servers, 'all', '', 2, 3);
+    expect(first.servers.map((s) => s.name)).toEqual(['legacy-b', 'legacy-a', 'a-old']);
+    expect(second.servers.map((s) => s.name)).toEqual(['z-new', 'disabled-a']);
+    expect(servers[0].name).toBe('disabled-a');
+  });
+
+  it('reverses creation order without moving disabled servers to the top', () => {
+    expect(
+      selectServerPage(servers, 'all', '', 1, 25, 'newest').servers.map((s) => s.name),
+    ).toEqual(['z-new', 'a-old', 'legacy-a', 'legacy-b', 'disabled-a']);
+  });
+
+  it('supports both name directions while retaining disabled-last grouping', () => {
+    expect(
+      selectServerPage(servers, 'all', '', 1, 25, 'name-asc').servers.map((s) => s.name),
+    ).toEqual(['a-old', 'legacy-a', 'legacy-b', 'z-new', 'disabled-a']);
+    expect(
+      selectServerPage(servers, 'all', '', 1, 25, 'name-desc').servers.map((s) => s.name),
+    ).toEqual(['z-new', 'legacy-b', 'legacy-a', 'a-old', 'disabled-a']);
   });
 });

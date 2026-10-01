@@ -127,6 +127,19 @@ import {
 } from '../../src/services/mcpService.js';
 
 describe('mcpService initialize metadata', () => {
+  it('keeps stored order after runtime initialization and exposes persisted creation time', async () => {
+    const stored = [
+      { name: 'first', type: 'stdio', command: 'node', enabled: false },
+      { name: 'second', type: 'stdio', command: 'node', enabled: false, createdAt: '2026-01-01T00:00:00Z' },
+    ];
+    mockFindAll.mockResolvedValue([...stored].reverse());
+    await initUpstreamServers();
+    mockFindAll.mockResolvedValue(stored);
+    const infos = await getServersInfo();
+    expect(infos.map(s => s.name)).toEqual(['first', 'second']);
+    expect(infos[1].createdAt).toBe('2026-01-01T00:00:00Z');
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     cleanupAllServers();

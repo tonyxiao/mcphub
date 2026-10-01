@@ -265,6 +265,7 @@ export class ServerDaoDbImpl implements ServerDao {
   }
 
   private mapToServerConfig(server: {
+    createdAt?: Date;
     name: string;
     type?: string;
     description?: string;
@@ -302,6 +303,7 @@ export class ServerDaoDbImpl implements ServerDao {
 
     return {
       name: server.name,
+      ...(server.createdAt ? { createdAt: server.createdAt.toISOString() } : {}),
       type: server.type as 'stdio' | 'sse' | 'streamable-http' | 'openapi' | undefined,
       description: server.description,
       url: server.url,

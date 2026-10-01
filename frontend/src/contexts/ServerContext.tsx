@@ -7,8 +7,8 @@ import { apiDelete, apiGet, apiPost, apiPut } from '../utils/fetchInterceptor';
 import { useAuth } from './AuthContext';
 
 const SERVERS_PER_PAGE_KEY = 'mcphub_servers_per_page';
-const DEFAULT_SERVERS_PER_PAGE = 5;
-const VALID_PAGE_SIZES = new Set([5, 10, 20, 50]);
+const DEFAULT_SERVERS_PER_PAGE = 25;
+const VALID_PAGE_SIZES = new Set([25, 50, 100, 200]);
 
 const getInitialServersPerPage = (): number => {
   if (typeof window === 'undefined') {

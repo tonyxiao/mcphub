@@ -208,6 +208,7 @@ export interface MyCredentialBinding {
 
 // Server config types
 export interface ServerConfig {
+  createdAt?: string; // Persisted creation time; absent for legacy JSON entries.
   credentialTemplate?: CredentialSlot[];
   type?: 'stdio' | 'sse' | 'streamable-http' | 'openapi';
   description?: string;
@@ -326,6 +327,7 @@ export interface OpenAPISecurityConfig {
 
 // Server types
 export interface Server {
+  createdAt?: string;
   name: string;
   owner?: string;
   visibility?: 'private' | 'group' | 'public';

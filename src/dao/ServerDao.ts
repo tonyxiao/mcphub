@@ -158,6 +158,7 @@ export class ServerDaoImpl extends JsonFileBaseDao implements ServerDao {
       ...updates,
       // Keep the existing name unless explicitly updating via rename
       name: updates.name ?? existing.name,
+      createdAt: existing.createdAt,
     };
   }
 
@@ -184,6 +185,7 @@ export class ServerDaoImpl extends JsonFileBaseDao implements ServerDao {
       enabled: true, // Default to enabled
       owner: 'admin', // Default owner
       ...data,
+      createdAt: new Date().toISOString(),
     };
 
     servers.push(newServer);

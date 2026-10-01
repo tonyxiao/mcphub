@@ -1,6 +1,25 @@
 import { ServerDaoImpl } from '../../src/dao/ServerDao.js';
 
 describe('ServerDaoImpl', () => {
+  it('timestamps new servers and preserves creation time through edits and duplication', async () => {
+    const dao = new ServerDaoImpl();
+    let stored: any[] = [];
+    jest.spyOn(dao as any, 'getAll').mockImplementation(async () => stored);
+    jest.spyOn(dao as any, 'saveAll').mockImplementation(async (servers: unknown) => {
+      stored = servers as any[];
+    });
+    const created = await dao.create({ name: 'original', createdAt: '2000-01-01T00:00:00Z' });
+    expect(Date.parse(created.createdAt!)).toBeGreaterThan(Date.parse('2000-01-01T00:00:00Z'));
+    const updated = await dao.update('original', { description: 'Updated', createdAt: undefined });
+    expect(updated?.createdAt).toBe(created.createdAt);
+    const duplicate = await dao.create({
+      ...created,
+      name: 'duplicate',
+      createdAt: '2000-01-01T00:00:00Z',
+    });
+    expect(duplicate.createdAt).not.toBe('2000-01-01T00:00:00Z');
+  });
+
   it('includes explicitly shared group servers in paginated user results', async () => {
     const dao = new ServerDaoImpl();
     jest.spyOn(dao as any, 'getAll').mockResolvedValue([

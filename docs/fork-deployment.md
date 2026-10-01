@@ -27,3 +27,10 @@ The optional `scripts/gog-mcp.mjs` adapter exposes GOG's supported tools with an
 private server environment to choose the default, and provide GOG's credential
 backend environment as usual. Each account has its own child process. The adapter
 preserves the existing Gmail no-send and explicit-write controls.
+
+The server list defaults to oldest creation first, with disabled servers last.
+The dashboard can also sort newest first or by name in either direction; the
+choice is saved per browser. New servers have a persistent creation timestamp.
+Legacy JSON entries without timestamps use their stored order (reversed for
+newest first); reconnecting does not change that order. Page sizes are 25, 50,
+100, and 200, defaulting to 25 when an older saved size is unsupported.

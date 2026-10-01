@@ -83,8 +83,10 @@ export async function migrateToDatabase(): Promise<boolean> {
               : {}),
           };
 
+          const createdAt = config.createdAt ? new Date(config.createdAt) : undefined;
           await serverRepo.create({
             name,
+            ...(createdAt && Number.isFinite(createdAt.getTime()) ? { createdAt } : {}),
             type: config.type,
             description: config.description,
             url: config.url,
