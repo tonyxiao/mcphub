@@ -1,3 +1,4 @@
+import { realpathSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join } from 'node:path';
@@ -77,6 +78,6 @@ export async function main() {
   await server.connect(new StdioServerTransport());
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) {
   main().catch(() => { console.error('GOG MCP startup failed; check credential access and supported accounts.'); process.exitCode = 1; });
 }
