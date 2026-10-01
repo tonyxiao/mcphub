@@ -1,3 +1,4 @@
+import { ServerNote, notePreview } from './ui/ServerNote.js';
 import { Link } from 'react-router-dom';
 import { useState, useRef, useEffect, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -619,13 +620,13 @@ const ServerCard = ({
               {!!server.config?.credentialTemplate?.length && (
                 <Link className="hub-tag text-xs" to={`/credentials?server=${encodeURIComponent(server.name)}`} onClick={(event) => event.stopPropagation()}>{t('credentials.personalBadge')} · {t('credentials.manage')}</Link>
               )}
-              {server.config?.description && (
+              {!expanded && server.config?.description && (
                 <div
                   className="text-[11.5px] truncate"
                   style={{ color: 'var(--hub-ink-3)', marginTop: 1 }}
                   title={server.config.description}
                 >
-                  {server.config.description}
+                  {notePreview(server.config.description)}
                 </div>
               )}
             </div>
@@ -866,6 +867,19 @@ const ServerCard = ({
             )}
           </div>
         </div>
+
+        {expanded && server.config?.description && (
+          <div
+            style={{
+              padding: '0 16px 12px 38px',
+              fontSize: 12,
+              color: 'var(--hub-ink-3)',
+              overflowWrap: 'anywhere',
+            }}
+          >
+            <ServerNote note={server.config.description} />
+          </div>
+        )}
 
         {/* Expanded detail */}
         {expanded && (

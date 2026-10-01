@@ -290,6 +290,7 @@ export class MCPHubOAuthProvider implements OAuthClientProvider {
     const hadPending = Boolean(currentOAuth?.pendingAuthorization);
 
     if (!accessTokenChanged && !refreshTokenChanged && !hadPending) {
+      this.clearAuthorizationState(tokens.access_token);
       return;
     }
 
@@ -312,12 +313,21 @@ export class MCPHubOAuthProvider implements OAuthClientProvider {
     this._codeVerifier = undefined;
     this._currentState = undefined;
 
-    const serverInfo = getServerByName(this.serverName);
-    if (serverInfo) {
-      serverInfo.oauth = undefined;
-    }
+    this.clearAuthorizationState(tokens.access_token);
 
     logger.log('Saved OAuth tokens', { serverName: this.serverName });
+  }
+
+  private clearAuthorizationState(accessToken: string): void {
+    const serverInfo = getServerByName(this.serverName);
+    if (!serverInfo) return;
+    serverInfo.oauth = undefined;
+    // Refresh can succeed on a live transport after an earlier request marked
+    // it oauth_required. Restore discovery only after credentials were saved.
+    if (accessToken && serverInfo.client && serverInfo.status === 'oauth_required') {
+      serverInfo.status = 'connected';
+      serverInfo.error = null;
+    }
   }
 
   /**

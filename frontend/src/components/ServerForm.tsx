@@ -358,7 +358,7 @@ const ServerForm = ({
     setOpenApiSecurityNotice(null);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
@@ -642,8 +642,15 @@ const ServerForm = ({
               >
                 {t('server.description')}
               </label>
-              <input
-                type="text"
+              <textarea
+                rows={3}
+                ref={(node) => {
+                  if (node) {
+                    node.style.height = 'auto';
+                    node.style.height = `${Math.max(96, node.scrollHeight + 2)}px`;
+                  }
+                }}
+                style={{ resize: 'vertical', overflow: 'hidden' }}
                 name="description"
                 id="description"
                 value={formData.description || ''}
